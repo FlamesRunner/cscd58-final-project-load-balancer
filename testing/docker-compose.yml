@@ -1,0 +1,22 @@
+version: '3'
+services:
+  server1:
+    image: nginx
+    volumes:
+      - ./http-1:/usr/share/nginx/html
+    ports:
+      - 5001:80
+
+  server2:
+    image: nginx
+    volumes:
+      - ./http-2:/usr/share/nginx/html
+    ports:
+      - 5002:80
+
+  server3:
+    image: nginx
+    volumes:
+      - ./http-3:/usr/share/nginx/html
+    ports:
+      - 5003:80

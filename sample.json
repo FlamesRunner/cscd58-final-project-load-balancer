@@ -1,9 +1,10 @@
 {
-    "worker_threads": 4,
-    "balancer_algorithm": "RESOURCE",
-    "listener_port": 0,
+    "max_queued_connections": 4,
+    "balancer_algorithm": "ROUND_ROBIN",
+    "listener_port": 5000,
     "connection_type": "TCP",
     "enc_key": "1234",
+    "health_check_interval": 15,
     "nodes": [
         {
             "name": "Target 1",

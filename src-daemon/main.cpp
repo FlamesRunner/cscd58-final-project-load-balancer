@@ -1,6 +1,7 @@
 #include <iostream>
 #include <getopt.h>
-#include "hdrs/config.hpp"
+#include "hdrs/LoadBalancerConfiguration.hpp"
+#include "hdrs/LoadBalancer.hpp"
 
 using namespace std;
 
@@ -37,6 +38,10 @@ void init_daemon(const char *config_file, bool detached)
 {
     // Read configuration file
     LoadBalancerConfiguration config = LoadBalancerConfiguration::read_config(config_file);
+
+    // Start daemon
+    LoadBalancer balancer = LoadBalancer(config);
+    balancer.start();
 }
 
 /**
@@ -49,6 +54,10 @@ int main(int argc, char **argv)
 {
     char *config_file = nullptr;
     bool detached = false;
+
+    // Initialize random seed (though we should swap this out with a better prng)
+    srand(time(NULL));
+
     for (;;)
     {
         switch (getopt(argc, argv, "c:h")) // note the colon (:) to indicate that 'b' has a parameter and is not a switch

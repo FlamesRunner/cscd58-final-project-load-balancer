@@ -26,11 +26,12 @@ A load balancer configuration is of the form:
 
 ```
 {
-    "worker_threads": <WORKER_THREADS>,
+    "max_queued_connections": <MAX_QUEUED_CONNECTIONS>,
     "balancer_algorithm": "<BALANCER_ALGO>",
     "listener_port": <LISTENER_PORT>,
     "connection_type": "<CONNECTION_TYPE>",
     "enc_key": <ENC_KEY>,
+    "health_check_interval": <HEALTH_CHECK_INTERVAL>,
     "nodes": [
         {
             "name": "Target 1",
@@ -59,7 +60,7 @@ A load balancer configuration is of the form:
 ```
 
 The parameters are as follows:
-- `<WORKER_THREADS>`: The maximum number of threads to spawn to handle an incoming connection.
+- `<MAX_QUEUED_CONNECTIONS>`: The maximum number of queued connections before rejection.
 - `<BALANCER_ALGO>`: One of the following: ROUND_ROBIN, RANDOM, RESOURCE
 - `<LISTENER_PORT>`: The port to listen on
 - `<CONNECTION_TYPE>`: One of the following: TCP, UDP
@@ -68,6 +69,7 @@ The parameters are as follows:
 - `<WEIGHT>`: Must be a positive integer.
 - `<HEALTH_DAEMON_PORT>`: The TCP port for which the health daemon is listening on the host. Only used for the **RESOURCE** alogirithm.
 - `<ENC_KEY>`: The encryption key used for securing communications between the health daemon and the load balancer.
+- `<HEALTH_CHECK_INTERVAL>`: The interval for which health checks are performed for nodes.
 
 Algorithms:
 - **RANDOM**: Randomly assign a server to an incoming connection. Weight values act as a scalar on the probability as follows: P(choose host)=(weight/total weight).

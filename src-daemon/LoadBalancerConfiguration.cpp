@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "hdrs/config.hpp"
+#include "hdrs/LoadBalancerConfiguration.hpp"
 #include "hdrs/json.hpp"
 
 using namespace std;
@@ -22,12 +22,13 @@ LoadBalancerConfiguration LoadBalancerConfiguration::read_config(const char *con
     config_stream >> config_json;
 
     // Parse configuration file
-    config.worker_threads = config_json["worker_threads"];
+    config.max_queued_connections = config_json["max_queued_connections"];
     config.balancer_algorithm = config_json["balancer_algorithm"];
     config.listener_port = config_json["listener_port"];
     config.connection_type = config_json["connection_type"];
     config.enc_key = config_json["enc_key"];
     config.nodes = vector<NodeConfiguration>();
+    config.health_check_interval = config_json["health_check_interval"];
 
     // Parse nodes
     json nodes_json = config_json["nodes"];
@@ -43,13 +44,14 @@ LoadBalancerConfiguration LoadBalancerConfiguration::read_config(const char *con
         config.nodes.push_back(node);
     }
 
-    assert(config.worker_threads > 0);
+    assert(config.max_queued_connections > 0);
     assert(config.listener_port > 0);
     assert(config.enc_key.length() > 0);
     assert(config.nodes.size() > 0);
+    assert(config.health_check_interval >= 15);
 
 #ifdef DEBUG
-    cout << "Worker threads: " << config.worker_threads << endl;
+    cout << "Worker threads: " << config.max_queued_connections << endl;
     cout << "Balancer algorithm: " << config.balancer_algorithm << endl;
     cout << "Listener port: " << config.listener_port << endl;
     cout << "Connection type: " << config.connection_type << endl;
