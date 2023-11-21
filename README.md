@@ -8,6 +8,8 @@ Andrew & Jochebed
 
 ## Build instructions
 
+**Note**: Please make sure you have the requisite libraries downloaded: `./download-libs.sh` before building.
+
 If you need debug symbols, run:
 
     make debug
