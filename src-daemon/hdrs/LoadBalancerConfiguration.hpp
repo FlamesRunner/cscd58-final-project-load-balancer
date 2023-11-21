@@ -23,8 +23,10 @@ public:
     std::string enc_key;
     std::vector<NodeConfiguration> nodes;
     int health_check_interval;
+
     // Configuration reader
     static LoadBalancerConfiguration read_config(const char *config_file);
+    
 };
 
 #define LB_CONF_HDR_DECL

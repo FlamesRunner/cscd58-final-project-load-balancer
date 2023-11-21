@@ -51,7 +51,7 @@ LoadBalancerConfiguration LoadBalancerConfiguration::read_config(const char *con
     assert(config.health_check_interval >= 15);
 
 #ifdef DEBUG
-    cout << "Worker threads: " << config.max_queued_connections << endl;
+    cout << "Maximum queued connections: " << config.max_queued_connections << endl;
     cout << "Balancer algorithm: " << config.balancer_algorithm << endl;
     cout << "Listener port: " << config.listener_port << endl;
     cout << "Connection type: " << config.connection_type << endl;

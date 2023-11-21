@@ -110,12 +110,23 @@ void LoadBalancer::listener()
         #endif
 
         // Choose node
-        // (Add load balancing algorithm here)
-        // For now, just assign randomly
-        int node_index = rand() % this->get_config().nodes.size();
-        NodeConfiguration node_config = this->get_config().nodes[node_index];
-        node_address.sin_port = htons(node_config.target_port);
-        node_address.sin_addr.s_addr = inet_addr(node_config.host.c_str());
+        LoadBalancerAlgorithm *algo = this->state.load_balancer_strategy;
+        int node_id = algo->chooseNode(this->state);
+        if (node_id == -1)
+        {
+            #ifdef DEBUG
+            cout << "No nodes available" << endl;
+            #endif
+            close(connection_socket);
+            continue;
+        }
+
+        #ifdef DEBUG
+        cout << "Chose node " << node_id << endl;
+        #endif
+
+        node_address.sin_port = htons(this->get_config().nodes[node_id].target_port);
+        node_address.sin_addr.s_addr = inet_addr(this->get_config().nodes[node_id].host.c_str());
 
         int node_socket;
         if (this->get_config().connection_type == "TCP")
@@ -138,7 +149,7 @@ void LoadBalancer::listener()
 void LoadBalancer::start()
 {
     // Initialize state
-    this->state = LoadBalancerState(this->get_config());
+    this->state = LoadBalancerState(this->config);
 
     // Start scheduled tasks in a new thread
     thread scheduled_tasks_thread(&LoadBalancer::scheduled_tasks, this);

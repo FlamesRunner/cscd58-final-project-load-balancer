@@ -9,6 +9,30 @@ enum NodeStatus {
     NODE_STATUS_DOWN
 };
 
+class LoadBalancerState;
+
+class LoadBalancerAlgorithm {
+    public:
+        virtual int chooseNode(LoadBalancerState state) = 0;
+};
+
+class LBRoundRobin:public LoadBalancerAlgorithm {
+    public:
+        LBRoundRobin();
+        int currentNode;
+        int chooseNode(LoadBalancerState state);
+};
+
+class LBRandom:public LoadBalancerAlgorithm {
+    public:
+        int chooseNode(LoadBalancerState state);
+};
+
+class LBResource:public LoadBalancerAlgorithm {
+    public:
+        int chooseNode(LoadBalancerState state);
+};
+
 class NodeState {
     public:
         NodeState(NodeConfiguration node_config);
@@ -26,7 +50,9 @@ class LoadBalancerState {
     public:
         LoadBalancerState(LoadBalancerConfiguration config);
         LoadBalancerConfiguration get_config(void);
+        std::vector<NodeState> getNodes();
         void run_health_checks(void);
+        LoadBalancerAlgorithm *load_balancer_strategy;
     private:
         LoadBalancerConfiguration config;
         std::vector<NodeState> nodes;
