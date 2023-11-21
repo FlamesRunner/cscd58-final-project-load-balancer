@@ -12,7 +12,7 @@ rm -rf src-daemon/json
 mkdir tmp-lib
 cd tmp-lib
 git clone git@github.com:nlohmann/json.git
-cp -R json ../src-daemon/json
+cp -R json/single_include/nlohmann/json.hpp ../src-daemon/hdrs/json.hpp
 cd ..
 rm -rf tmp-lib
 

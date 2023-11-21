@@ -1,10 +1,10 @@
 {
     "worker_threads": 4,
     "balancer_algorithm": "RESOURCE",
-    "listener_port": 5000,
+    "listener_port": 0,
     "connection_type": "TCP",
     "enc_key": "1234",
-    "load_balancers": [
+    "nodes": [
         {
             "name": "Target 1",
             "weight": 1,

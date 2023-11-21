@@ -1,5 +1,6 @@
 #include <iostream>
 #include <getopt.h>
+#include "hdrs/config.hpp"
 
 using namespace std;
 
@@ -24,6 +25,19 @@ void print_usage(FILE *fd, const char *prg_name) {
 }
 
 /**
+ * Initializes the daemon. This includes:
+ * - Reading the configuration file
+ * - Initializing the logger
+ * 
+ * @param config_file Location of the configuration file
+ * @param detached Whether to run in detached mode or not
+*/
+void init_daemon(const char *config_file, bool detached) {
+    // Read configuration file
+    LoadBalancerConfiguration config = LoadBalancerConfiguration::read_config(config_file);
+}
+
+/**
  * Main wrapper function. Handles argument parsing and initializes the daemon.
  *
  * @param argc # of arguments passed
@@ -31,7 +45,8 @@ void print_usage(FILE *fd, const char *prg_name) {
  */
 int main(int argc, char **argv)
 {
-    char *str_ptr = nullptr;
+    char *config_file = nullptr;
+    bool detached = false;
     for (;;)
     {
         switch (getopt(argc, argv, "c:h")) // note the colon (:) to indicate that 'b' has a parameter and is not a switch
@@ -41,9 +56,10 @@ int main(int argc, char **argv)
             exit(0);
             break;
         case 'c':
-            str_ptr = optarg;
-            fprintf(stdout, "arg: %s\n", str_ptr);
-            exit(0);
+            config_file = optarg;
+            break;
+        case 'd':
+            detached = true;
             break;
         default:
             fprintf(stderr, "Invalid argument options.\n");
@@ -55,4 +71,12 @@ int main(int argc, char **argv)
         }
         break;
     }
+
+    if (config_file == nullptr) {
+        fprintf(stderr, "No configuration file specified.\n");
+        print_usage(stderr, argv[0]);
+        exit(1);
+    }
+
+    init_daemon(config_file, detached);
 }

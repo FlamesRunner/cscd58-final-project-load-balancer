@@ -31,7 +31,7 @@ A load balancer configuration is of the form:
     "listener_port": <LISTENER_PORT>,
     "connection_type": "<CONNECTION_TYPE>",
     "enc_key": <ENC_KEY>,
-    "load_balancers": [
+    "nodes": [
         {
             "name": "Target 1",
             "weight": <WEIGHT>,
