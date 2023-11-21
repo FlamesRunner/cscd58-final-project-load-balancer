@@ -1,0 +1,9 @@
+name: Code formatter
+on: [push]
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+      uses: cpp-linter/cpp-linter-action@v2.7.1
+
+

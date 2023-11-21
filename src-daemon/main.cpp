@@ -7,32 +7,34 @@ using namespace std;
 /**
  * Prints to the specified file descriptor usage information
  * for the wrapper.
- * 
+ *
  * @param fd File descriptor
  * @param prg_name Name of the executable, usually given by argv[0]
-*/
-void print_usage(FILE *fd, const char *prg_name) {
+ */
+void print_usage(FILE *fd, const char *prg_name)
+{
     fprintf(fd, "Usage: %s <args>\n", prg_name);
     fprintf(fd, "\t-h: This usage information\n");
-    fprintf(fd, "\t-c <location_to_config>: Required. Specifies the configuration file to use.\n"); 
+    fprintf(fd, "\t-c <location_to_config>: Required. Specifies the configuration file to use.\n");
     fprintf(fd, "\t-d: Detached mode (daemon mode)\n");
-    #ifdef PRODUCTION
-        fprintf(fd, "Build: production\n");
-    #endif
-    #ifdef DEBUG
-        fprintf(fd, "Build: with debug symbols\n");
-    #endif
+#ifdef PRODUCTION
+    fprintf(fd, "Build: production\n");
+#endif
+#ifdef DEBUG
+    fprintf(fd, "Build: with debug symbols\n");
+#endif
 }
 
 /**
  * Initializes the daemon. This includes:
  * - Reading the configuration file
  * - Initializing the logger
- * 
+ *
  * @param config_file Location of the configuration file
  * @param detached Whether to run in detached mode or not
-*/
-void init_daemon(const char *config_file, bool detached) {
+ */
+void init_daemon(const char *config_file, bool detached)
+{
     // Read configuration file
     LoadBalancerConfiguration config = LoadBalancerConfiguration::read_config(config_file);
 }
@@ -72,7 +74,8 @@ int main(int argc, char **argv)
         break;
     }
 
-    if (config_file == nullptr) {
+    if (config_file == nullptr)
+    {
         fprintf(stderr, "No configuration file specified.\n");
         print_usage(stderr, argv[0]);
         exit(1);
