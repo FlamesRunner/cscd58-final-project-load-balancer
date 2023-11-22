@@ -1,0 +1,17 @@
+{
+    "max_queued_connections": 4,
+    "balancer_algorithm": "SOME-RANDOM-JINGLE",
+    "listener_port": 5000,
+    "connection_type": "TCP",
+    "enc_key": "1234",
+    "health_check_interval": 15,
+    "nodes": [
+        {
+            "name": "Target 1",
+            "weight": 1,
+            "host": "127.0.0.1",
+            "target_port": 5001,
+            "health_daemon": 6001
+        }
+    ]
+}

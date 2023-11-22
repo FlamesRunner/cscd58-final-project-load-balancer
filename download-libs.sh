@@ -11,7 +11,7 @@ rm -rf src-daemon/json
 # Download
 mkdir tmp-lib
 cd tmp-lib
-git clone git@github.com:nlohmann/json.git
+git clone https://github.com/nlohmann/json
 cp -R json/single_include/nlohmann/json.hpp ../src-daemon/hdrs/json.hpp
 cd ..
 rm -rf tmp-lib
