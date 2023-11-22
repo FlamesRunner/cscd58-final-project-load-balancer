@@ -17,7 +17,7 @@ jobs:
         run: sudo apt-get install g++ iputils-ping -y
 
       - name: Download requisite libraries
-        run: ./testing/tests/download-libs.sh
+        run: ./download-libs.sh
 
       - name: Run tests
         run: ./testing/tests/run-all-tests.sh > ./testing/tests/test-results.txt
