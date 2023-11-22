@@ -16,6 +16,7 @@ public:
 class LoadBalancerConfiguration
 {
 public:
+    LoadBalancerConfiguration(){};
     int max_queued_connections;
     std::string balancer_algorithm;
     int listener_port;
@@ -25,8 +26,7 @@ public:
     int health_check_interval;
 
     // Configuration reader
-    static LoadBalancerConfiguration read_config(const char *config_file);
-    
+    static LoadBalancerConfiguration &read_config(const char *config_file);
 };
 
 #define LB_CONF_HDR_DECL

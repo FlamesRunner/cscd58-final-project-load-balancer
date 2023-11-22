@@ -10,11 +10,6 @@
 
 using namespace std;
 
-LoadBalancer::LoadBalancer(LoadBalancerConfiguration config)
-{
-    this->config = config;
-}
-
 void LoadBalancer::scheduled_tasks()
 {
     while (true)
@@ -149,7 +144,7 @@ void LoadBalancer::listener()
 void LoadBalancer::start()
 {
     // Initialize state
-    this->state = LoadBalancerState(this->config);
+    this->state = LoadBalancerState(config);
 
     // Start scheduled tasks in a new thread
     thread scheduled_tasks_thread(&LoadBalancer::scheduled_tasks, this);
@@ -159,7 +154,7 @@ void LoadBalancer::start()
     this->listener();
 }
 
-LoadBalancerConfiguration LoadBalancer::get_config(void)
+LoadBalancerConfiguration &LoadBalancer::get_config(void)
 {
     return this->config;
 }

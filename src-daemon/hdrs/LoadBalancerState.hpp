@@ -13,24 +13,24 @@ class LoadBalancerState;
 
 class LoadBalancerAlgorithm {
     public:
-        virtual int chooseNode(LoadBalancerState state) = 0;
+        virtual int chooseNode(LoadBalancerState &state) = 0;
 };
 
 class LBRoundRobin:public LoadBalancerAlgorithm {
     public:
         LBRoundRobin();
         int currentNode;
-        int chooseNode(LoadBalancerState state);
+        int chooseNode(LoadBalancerState &state);
 };
 
 class LBRandom:public LoadBalancerAlgorithm {
     public:
-        int chooseNode(LoadBalancerState state);
+        int chooseNode(LoadBalancerState &state);
 };
 
 class LBResource:public LoadBalancerAlgorithm {
     public:
-        int chooseNode(LoadBalancerState state);
+        int chooseNode(LoadBalancerState &state);
 };
 
 class NodeState {
@@ -48,6 +48,7 @@ class NodeState {
 
 class LoadBalancerState {
     public:
+        LoadBalancerState(){};
         LoadBalancerState(LoadBalancerConfiguration config);
         LoadBalancerConfiguration get_config(void);
         std::vector<NodeState> getNodes();
@@ -56,6 +57,8 @@ class LoadBalancerState {
     private:
         LoadBalancerConfiguration config;
         std::vector<NodeState> nodes;
+        bool ping_health_check(NodeState &node);
+        bool tcp_health_check(NodeState &node);
 };
 
 #define LB_BS_HDR_DECL

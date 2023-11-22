@@ -1,5 +1,6 @@
 #include <iostream>
 #include "hdrs/LoadBalancerState.hpp"
+using namespace std;
 
 LoadBalancerState::LoadBalancerState(LoadBalancerConfiguration config) {
     this->config = config;
@@ -20,7 +21,7 @@ LoadBalancerState::LoadBalancerState(LoadBalancerConfiguration config) {
     } else if (config.balancer_algorithm == "RESOURCE") {
         this->load_balancer_strategy = new LBResource();
     } else {
-        std::cerr << "Invalid load balancer algorithm: " << config.balancer_algorithm << std::endl;
+        cerr << "Invalid load balancer algorithm: " << config.balancer_algorithm << endl;
         exit(1);
     }
 }
@@ -41,25 +42,47 @@ void NodeState::set_status(NodeStatus status) {
     this->status = status;
 }
 
+bool LoadBalancerState::ping_health_check(NodeState &node) {
+    // Ping the node (need to fix so it isn't platform dependent).
+    // Don't output anything to stdout
+    int ping_result = system(("ping -c 1 -W 5 " + node.node_config.host + " > /dev/null").c_str());
+    #ifdef DEBUG
+    cout << "Pinging node '" << node.node_config.name << "' at " << node.node_config.host << "... ";
+    cout << "Ping result: " << ping_result << endl;
+    #endif
+
+    // Check the result
+    if (ping_result == 0) {
+        // Node is up
+        #ifdef DEBUG
+        cout << "Node " << node.node_config.name << " is up!" << endl;
+        #endif
+        return true;
+    } else {
+        // Node is down
+        #ifdef DEBUG
+        cout << "Node " << node.node_config.name << " is down!" << endl;
+        #endif
+        return false;
+    }
+}
+
+bool LoadBalancerState::tcp_health_check(NodeState &node) {
+    // Stub: need to implement
+    return true;
+}
+
 void LoadBalancerState::run_health_checks(void) {
     // For now, we just do a ping
-    for (NodeState node : this->nodes) {
-        // Ping the node (need to fix so it isn't platform dependent).
-        // Don't output anything to stdout
-        int ping_result = system(("ping -c 1 -W 5 " + node.node_config.host + " > /dev/null").c_str());
-
-        // Check the result
-        if (ping_result == 0) {
-            // Node is up
-            node.set_status(NODE_STATUS_UP);
+    bool icmp_check = (this->config.balancer_algorithm != "RESOURCE");
+    for (NodeState &node : this->nodes) {
+        bool status = false;
+        if (icmp_check) {
+            status = this->ping_health_check(node);
         } else {
-            // Node is down
-            std::cout << "Node " << node.node_config.name << " is down!" << std::endl;
-            node.set_status(NODE_STATUS_DOWN);
+            status = this->tcp_health_check(node);
         }
-
-        // Update last checked
-        node.set_last_checked(time(NULL));
+        node.set_status(status ? NODE_STATUS_UP : NODE_STATUS_DOWN);
     }
 }
 

@@ -11,10 +11,10 @@ using json = nlohmann::json;
  *
  * @param config_file Location of the configuration file
  */
-LoadBalancerConfiguration LoadBalancerConfiguration::read_config(const char *config_file)
+LoadBalancerConfiguration &LoadBalancerConfiguration::read_config(const char *config_file)
 {
     cout << "Reading configuration file " << config_file << endl;
-    LoadBalancerConfiguration config;
+    LoadBalancerConfiguration &config = *(new LoadBalancerConfiguration());
 
     // Read configuration file as JSON
     ifstream config_stream(config_file);
@@ -49,24 +49,6 @@ LoadBalancerConfiguration LoadBalancerConfiguration::read_config(const char *con
     assert(config.enc_key.length() > 0);
     assert(config.nodes.size() > 0);
     assert(config.health_check_interval >= 15);
-
-#ifdef DEBUG
-    cout << "Maximum queued connections: " << config.max_queued_connections << endl;
-    cout << "Balancer algorithm: " << config.balancer_algorithm << endl;
-    cout << "Listener port: " << config.listener_port << endl;
-    cout << "Connection type: " << config.connection_type << endl;
-    cout << "Encryption key: " << config.enc_key << endl;
-    cout << "Nodes: " << endl;
-    for (NodeConfiguration node : config.nodes)
-    {
-        cout << "\tName: " << node.name << endl;
-        cout << "\tHost: " << node.host << endl;
-        cout << "\tTarget port: " << node.target_port << endl;
-        cout << "\tHealth daemon: " << node.health_daemon << endl;
-        cout << "\tWeight: " << node.weight << endl
-             << endl;
-    }
-#endif
 
     return config;
 }

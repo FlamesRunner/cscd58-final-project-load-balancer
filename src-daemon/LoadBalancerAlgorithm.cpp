@@ -14,7 +14,7 @@ LBRoundRobin::LBRoundRobin()
  * @param state The current state of the load balancer
  * @return The node ID of the chosen node
 */
-int LBRoundRobin::chooseNode(LoadBalancerState state)
+int LBRoundRobin::chooseNode(LoadBalancerState &state)
 {
     // Calculate total weight
     int total = 0;
@@ -23,8 +23,9 @@ int LBRoundRobin::chooseNode(LoadBalancerState state)
 
     for (NodeState node : state.getNodes())
     {
-        if (node.get_status() == NODE_STATUS_UP)
+        if (node.get_status() == NODE_STATUS_UP) {
             total += node.node_config.weight;
+        }
     }
 
     if (this->currentNode >= total)
@@ -32,17 +33,21 @@ int LBRoundRobin::chooseNode(LoadBalancerState state)
         this->currentNode = 0;
     }
 
+    /*
+        Essentially, we do the following:
+        [0, weight1) = node1
+        [weight1, weight2) = node2
+        ...
+    */
     for (NodeState node : state.getNodes())
     {
-        if (node.get_status() == NODE_STATUS_DOWN) {
-            continue;
-        }
-
-        current += node.node_config.weight;
-        if (this->currentNode > current)
-        {
-            this->currentNode++;
-            return nodeId;
+        if (node.get_status() == NODE_STATUS_UP) {
+            current += node.node_config.weight;
+            if (this->currentNode < current)
+            {
+                this->currentNode++;
+                return nodeId;
+            }
         }
 
         ++nodeId;
@@ -57,7 +62,7 @@ int LBRoundRobin::chooseNode(LoadBalancerState state)
  * @param state The current state of the load balancer
  * @return The node ID of the chosen node
 */
-int LBRandom::chooseNode(LoadBalancerState state)
+int LBRandom::chooseNode(LoadBalancerState &state)
 {
     // Calculate total weight
     int total = 0;
@@ -98,7 +103,7 @@ int LBRandom::chooseNode(LoadBalancerState state)
  * @param state The current state of the load balancer
  * @return The node ID of the chosen node
 */
-int LBResource::chooseNode(LoadBalancerState state)
+int LBResource::chooseNode(LoadBalancerState &state)
 {
     return 0;
 }

@@ -7,15 +7,17 @@
 
 class LoadBalancer {
     public:
-        LoadBalancer(LoadBalancerConfiguration config);
-        LoadBalancerConfiguration get_config(void);
+        LoadBalancer(const LoadBalancerConfiguration config) {
+            this->config = config;
+        };
+        LoadBalancerConfiguration &get_config(void);
+        LoadBalancerConfiguration config;
         void start();
         LoadBalancerState get_state(void);
         void scheduled_tasks();
     private:
-        LoadBalancerConfiguration config;
-        LoadBalancerState state = LoadBalancerState(config);
-        void listener();
+        LoadBalancerState state;
+        void listener(void);
         void forward_traffic(int from_socket, int to_socket);
 };
 

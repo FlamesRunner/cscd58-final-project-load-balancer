@@ -2,6 +2,7 @@
 #include <getopt.h>
 #include "hdrs/LoadBalancerConfiguration.hpp"
 #include "hdrs/LoadBalancer.hpp"
+#include <thread>
 
 using namespace std;
 
@@ -17,7 +18,6 @@ void print_usage(FILE *fd, const char *prg_name)
     fprintf(fd, "Usage: %s <args>\n", prg_name);
     fprintf(fd, "\t-h: This usage information\n");
     fprintf(fd, "\t-c <location_to_config>: Required. Specifies the configuration file to use.\n");
-    fprintf(fd, "\t-d: Detached mode (daemon mode)\n");
 #ifdef PRODUCTION
     fprintf(fd, "Build: production\n");
 #endif
@@ -32,12 +32,27 @@ void print_usage(FILE *fd, const char *prg_name)
  * - Initializing the logger
  *
  * @param config_file Location of the configuration file
- * @param detached Whether to run in detached mode or not
  */
-void init_daemon(const char *config_file, bool detached)
+void init_daemon(const char *config_file)
 {
     // Read configuration file
-    LoadBalancerConfiguration config = LoadBalancerConfiguration::read_config(config_file);
+    LoadBalancerConfiguration &config = LoadBalancerConfiguration::read_config(config_file);
+
+    cout << "Maximum queued connections: " << config.max_queued_connections << endl;
+    cout << "Balancer algorithm: " << config.balancer_algorithm << endl;
+    cout << "Listener port: " << config.listener_port << endl;
+    cout << "Connection type: " << config.connection_type << endl;
+    cout << "Encryption key: " << config.enc_key << endl;
+    cout << "Nodes: " << endl;
+    for (NodeConfiguration node : config.nodes)
+    {
+        cout << "\tName: " << node.name << endl;
+        cout << "\tHost: " << node.host << endl;
+        cout << "\tTarget port: " << node.target_port << endl;
+        cout << "\tHealth daemon: " << node.health_daemon << endl;
+        cout << "\tWeight: " << node.weight << endl
+             << endl;
+    }
 
     // Start daemon
     LoadBalancer balancer = LoadBalancer(config);
@@ -53,7 +68,6 @@ void init_daemon(const char *config_file, bool detached)
 int main(int argc, char **argv)
 {
     char *config_file = nullptr;
-    bool detached = false;
 
     // Initialize random seed (though we should swap this out with a better prng)
     srand(time(NULL));
@@ -68,9 +82,6 @@ int main(int argc, char **argv)
             break;
         case 'c':
             config_file = optarg;
-            break;
-        case 'd':
-            detached = true;
             break;
         default:
             fprintf(stderr, "Invalid argument options.\n");
@@ -90,5 +101,5 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    init_daemon(config_file, detached);
+    init_daemon(config_file);
 }
