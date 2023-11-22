@@ -75,9 +75,9 @@ void LoadBalancer::listener()
         exit(1);
     }
 
-    #ifdef DEBUG
+#ifdef DEBUG
     cout << "Listening on port " << this->get_config().listener_port << endl;
-    #endif
+#endif
 
     while (true)
     {
@@ -89,9 +89,9 @@ void LoadBalancer::listener()
 
         if (connection_socket < 0)
         {
-            #ifdef DEBUG
+#ifdef DEBUG
             cout << "Error accepting connection: code " << errno << endl;
-            #endif
+#endif
             sleep(1);
             continue;
         }
@@ -100,25 +100,25 @@ void LoadBalancer::listener()
         struct sockaddr_in node_address;
         node_address.sin_family = AF_INET;
 
-        #ifdef DEBUG
+#ifdef DEBUG
         cout << "Connection from " << inet_ntoa(client_address.sin_addr) << ":" << ntohs(client_address.sin_port) << endl;
-        #endif
+#endif
 
         // Choose node
         LoadBalancerAlgorithm *algo = this->state.load_balancer_strategy;
         int node_id = algo->chooseNode(this->state);
         if (node_id == -1)
         {
-            #ifdef DEBUG
+#ifdef DEBUG
             cout << "No nodes available" << endl;
-            #endif
+#endif
             close(connection_socket);
             continue;
         }
 
-        #ifdef DEBUG
+#ifdef DEBUG
         cout << "Chose node " << node_id << endl;
-        #endif
+#endif
 
         node_address.sin_port = htons(this->get_config().nodes[node_id].target_port);
         node_address.sin_addr.s_addr = inet_addr(this->get_config().nodes[node_id].host.c_str());

@@ -2,7 +2,7 @@
 
 /**
  * Round robin algorithm constructor
-*/
+ */
 LBRoundRobin::LBRoundRobin()
 {
     this->currentNode = 0;
@@ -10,10 +10,10 @@ LBRoundRobin::LBRoundRobin()
 
 /**
  * Chooses a node based on a round robin selection
- * 
+ *
  * @param state The current state of the load balancer
  * @return The node ID of the chosen node
-*/
+ */
 int LBRoundRobin::chooseNode(LoadBalancerState &state)
 {
     // Calculate total weight
@@ -23,7 +23,8 @@ int LBRoundRobin::chooseNode(LoadBalancerState &state)
 
     for (NodeState node : state.getNodes())
     {
-        if (node.get_status() == NODE_STATUS_UP) {
+        if (node.get_status() == NODE_STATUS_UP)
+        {
             total += node.node_config.weight;
         }
     }
@@ -41,7 +42,8 @@ int LBRoundRobin::chooseNode(LoadBalancerState &state)
     */
     for (NodeState node : state.getNodes())
     {
-        if (node.get_status() == NODE_STATUS_UP) {
+        if (node.get_status() == NODE_STATUS_UP)
+        {
             current += node.node_config.weight;
             if (this->currentNode < current)
             {
@@ -58,10 +60,10 @@ int LBRoundRobin::chooseNode(LoadBalancerState &state)
 
 /**
  * Chooses a node based on a random weighted selection
- * 
+ *
  * @param state The current state of the load balancer
  * @return The node ID of the chosen node
-*/
+ */
 int LBRandom::chooseNode(LoadBalancerState &state)
 {
     // Calculate total weight
@@ -71,7 +73,8 @@ int LBRandom::chooseNode(LoadBalancerState &state)
 
     for (NodeState node : nodes)
     {
-        if (node.get_status() == NODE_STATUS_UP) {
+        if (node.get_status() == NODE_STATUS_UP)
+        {
             upNodes.push_back(node);
             total += node.node_config.weight;
         }
@@ -99,10 +102,10 @@ int LBRandom::chooseNode(LoadBalancerState &state)
 
 /**
  * Chooses a node based on the server's resources
- * 
+ *
  * @param state The current state of the load balancer
  * @return The node ID of the chosen node
-*/
+ */
 int LBResource::chooseNode(LoadBalancerState &state)
 {
     return 0;
