@@ -1,0 +1,29 @@
+name: Run test suite
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v2
+
+      - name: Install prerequisites
+        # install ping
+        run: sudo apt-get install g++ iputils-ping -y
+
+      - name: Run tests
+        run: ./testing/tests/run-all-tests.sh > ./testing/tests/test-results.txt
+
+      - name: Test results
+        run: |
+          if [ $? -ne 0 ]; then
+            echo "The test suite returned a non-zero exit code (failed). See the output below:"
+            cat ./testing/tests/test-results.txt
+            exit 1
+          fi
