@@ -62,12 +62,14 @@ public:
     std::vector<NodeState> getNodes();
     void run_health_checks(void);
     LoadBalancerAlgorithm *load_balancer_strategy;
+    void start_rt_checks(void);
 
 private:
     LoadBalancerConfiguration config;
     std::vector<NodeState> nodes;
     bool ping_health_check(NodeState &node);
     bool tcp_health_check(NodeState &node);
+    void lb_rt_thread(NodeState &node);
 };
 
 #define LB_BS_HDR_DECL

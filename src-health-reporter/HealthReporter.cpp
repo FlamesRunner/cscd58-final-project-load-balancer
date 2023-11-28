@@ -233,7 +233,6 @@ std::vector<unsigned char> HealthReporterConnection::encrypt_health_report(Healt
 
     plusaes::encrypt_cbc((unsigned char*)raw_data.data(), raw_data.size(), &key[0], key.size(), &iv, &encrypted[0], encrypted.size(), true);
 
-
     // Encrypt health report
     return encrypted;
 }
@@ -259,6 +258,6 @@ void HealthReporterConnection::handle_connected()
         }
 
         // Sleep for 1 second
-        sleep(1);
+        this_thread::sleep_for(chrono::seconds(1));
     }
 }

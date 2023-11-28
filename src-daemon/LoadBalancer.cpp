@@ -18,7 +18,7 @@ void LoadBalancer::scheduled_tasks()
         this->state.run_health_checks();
 
         // Sleep for 15 seconds
-        sleep(this->get_config().health_check_interval);
+        this_thread::sleep_for(chrono::seconds(this->get_config().health_check_interval));
     }
 }
 
@@ -149,6 +149,11 @@ void LoadBalancer::start()
     // Start scheduled tasks in a new thread
     thread scheduled_tasks_thread(&LoadBalancer::scheduled_tasks, this);
     scheduled_tasks_thread.detach();
+
+    // Check if we need to start resource LB connections
+    if (config.balancer_algorithm == "RESOURCE") {
+        this->state.start_rt_checks();
+    }
 
     // Start listener
     this->listener();
