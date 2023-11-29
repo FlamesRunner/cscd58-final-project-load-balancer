@@ -5,6 +5,7 @@
     "connection_type": "TCP",
     "enc_key": "1234",
     "health_check_interval": 15,
+    "time_until_node_down": 5,
     "nodes": [
         {
             "name": "Target 1",

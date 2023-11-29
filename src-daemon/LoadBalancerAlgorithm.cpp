@@ -1,4 +1,5 @@
 #include "hdrs/LoadBalancerState.hpp"
+#include <climits>
 
 /**
  * Round robin algorithm constructor
@@ -21,8 +22,9 @@ int LBRoundRobin::chooseNode(LoadBalancerState &state)
     int current = 0;
     int nodeId = 0;
 
-    for (NodeState node : state.getNodes())
+    for (std::shared_ptr<NodeState> &node_ptr : state.getNodes())
     {
+        NodeState node = *node_ptr;
         if (node.get_status() == NODE_STATUS_UP)
         {
             total += node.node_config.weight;
@@ -40,8 +42,9 @@ int LBRoundRobin::chooseNode(LoadBalancerState &state)
         [weight1, weight2) = node2
         ...
     */
-    for (NodeState node : state.getNodes())
+    for (std::shared_ptr<NodeState> &node_ptr : state.getNodes())
     {
+        NodeState node = *node_ptr;
         if (node.get_status() == NODE_STATUS_UP)
         {
             current += node.node_config.weight;
@@ -68,11 +71,12 @@ int LBRandom::chooseNode(LoadBalancerState &state)
 {
     // Calculate total weight
     int total = 0;
-    std::vector<NodeState> nodes = state.getNodes();
+    std::vector<std::shared_ptr<NodeState>> node_ptrs = state.getNodes();
     std::vector<NodeState> upNodes = std::vector<NodeState>();
 
-    for (NodeState node : nodes)
+    for (std::shared_ptr<NodeState> &node_ptr : node_ptrs)
     {
+        NodeState node = *node_ptr;
         if (node.get_status() == NODE_STATUS_UP)
         {
             upNodes.push_back(node);
@@ -108,5 +112,30 @@ int LBRandom::chooseNode(LoadBalancerState &state)
  */
 int LBResource::chooseNode(LoadBalancerState &state)
 {
-    return 0;
+    // Calculate score for each node. The node with the lowest score is chosen.
+    // score(cpu_load, mem_usage, weight) = (cpu_load * 100 + mem_usage) * (1 / weight)
+    int lowest_score = INT_MAX;
+    int lowest_score_node_id = -1;
+    int node_id = 0;
+
+    std::vector<std::shared_ptr<NodeState>> node_ptrs = state.getNodes();
+
+    for (std::shared_ptr<NodeState> &node_ptr : node_ptrs)
+    {
+        NodeState node = *node_ptr;
+        std::cout << node.cpu_usage << " " << node.mem_usage << " " << node.node_config.weight << std::endl;
+        if (node.get_status() == NODE_STATUS_UP)
+        {
+            int score = (int)((node.cpu_usage * 100 + node.mem_usage) * (1.0 / node.node_config.weight));
+            if (score < lowest_score)
+            {
+                lowest_score = score;
+                lowest_score_node_id = node_id;
+            }
+        }
+
+        ++node_id;
+    }
+
+    return lowest_score_node_id;
 }

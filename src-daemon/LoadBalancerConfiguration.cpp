@@ -29,6 +29,7 @@ LoadBalancerConfiguration &LoadBalancerConfiguration::read_config(const char *co
     config.enc_key = config_json["enc_key"];
     config.nodes = vector<NodeConfiguration>();
     config.health_check_interval = config_json["health_check_interval"];
+    config.time_until_node_down = config_json["time_until_node_down"];
 
     // Parse nodes
     json nodes_json = config_json["nodes"];
@@ -42,6 +43,12 @@ LoadBalancerConfiguration &LoadBalancerConfiguration::read_config(const char *co
         node.health_daemon = it.value()["health_daemon"];
         node.weight = it.value()["weight"];
         config.nodes.push_back(node);
+
+        assert(node.name.length() > 0);
+        assert(node.host.length() > 0);
+        assert(node.target_port > 0);
+        assert(node.health_daemon > 0);
+        assert(node.weight >= 0);
     }
 
     assert(config.max_queued_connections > 0);
@@ -49,6 +56,7 @@ LoadBalancerConfiguration &LoadBalancerConfiguration::read_config(const char *co
     assert(config.enc_key.length() > 0);
     assert(config.nodes.size() > 0);
     assert(config.health_check_interval >= 15);
+    assert(config.time_until_node_down >= 1);
 
     return config;
 }

@@ -32,6 +32,7 @@ A load balancer configuration is of the form:
     "connection_type": "<CONNECTION_TYPE>",
     "enc_key": <ENC_KEY>,
     "health_check_interval": <HEALTH_CHECK_INTERVAL>,
+    "time_until_node_down": <TIME_UNTIL_NODE_DOWN>,
     "nodes": [
         {
             "name": "Target 1",
@@ -68,8 +69,9 @@ The parameters are as follows:
 - `<TARGET_PORT>`: The port on the IP to forward traffic to
 - `<WEIGHT>`: Must be a positive integer.
 - `<HEALTH_DAEMON_PORT>`: The TCP port for which the health daemon is listening on the host. Only used for the **RESOURCE** alogirithm.
-- `<ENC_KEY>`: The encryption key used for securing communications between the health daemon and the load balancer.
-- `<HEALTH_CHECK_INTERVAL>`: The interval for which health checks are performed for nodes.
+- `<ENC_KEY>`: The encryption key used for securing communications between the health daemon and the load balancer. Must be a 16-byte string.
+- `<HEALTH_CHECK_INTERVAL>`: The interval for which health checks are performed for nodes. Applicable for all algorithms except **RESOURCE**.
+- `<TIME_UNTIL_NODE_DOWN>`: The time until a node is considered down. Only applicable for the **RESOURCE** algorithm.
 
 Algorithms:
 - **RANDOM**: Randomly assign a server to an incoming connection. Weight values act as a scalar on the probability as follows: P(choose host)=(weight/total weight).
@@ -81,7 +83,10 @@ Health checks:
 
 An example is available at `sample.json`.
 
-## Health status daemon configuration
+## Health status daemon
 
-A health status daemon configuration is as follows:
-(to be filled)
+The health reporter daemon can be run as follows:
+
+    ./health_reporter <PORT> <ENC_KEY>
+
+such that `<PORT>` is the port to listen on and `<ENC_KEY>` is an encryption key that is 16 bytes long.

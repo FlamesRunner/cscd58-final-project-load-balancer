@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <random>
 #include <unistd.h>
 #include <thread>
 #include <string>
@@ -85,6 +86,18 @@ HealthReporterConnection::HealthReporterConnection(int socket, string enc_key)
 
     // Set SIGPIPE handler
     signal(SIGPIPE, sigpipe_handler);
+
+    // Set encryption key
+    this->enc_key = enc_key;
+
+    // Generate random IV
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 255);
+    for (int i = 0; i < 16; i++)
+    {
+        this->iv[i] = dis(gen);
+    }
 }
 
 void HealthReporterConnection::start()
@@ -109,7 +122,7 @@ void HealthReporterConnection::start()
 bool HealthReporterConnection::handle_lb_handshake()
 {
     // Check for handshake message HR_HANDSHAKE_MSG_1
-    char buf[1024];
+    char buf[BUFFER_SIZE];
     memset(buf, 0, sizeof(buf));
 
     int bytes_read = read(this->socket, buf, sizeof(buf));
@@ -147,6 +160,14 @@ bool HealthReporterConnection::handle_lb_handshake()
         return false;
     }
 
+    // Send IV to load balancer
+    string iv_str = string(HR_HANDSHAKE_MSG_4) + string((char *)this->iv, 16) + string("\n");
+    if (write(this->socket, iv_str.c_str(), iv_str.size()) < 0)
+    {
+        cerr << "Failed to write to socket" << endl;
+        return false;
+    }
+
     // Connection is now established
     this->state = HR_STATE_CONNECTED;
     return true;
@@ -179,7 +200,7 @@ HealthReport_t HealthReporterConnection::generate_health_report()
     else
     {
         // Only take MemAvailable and MemTotal
-        char buf[1024];
+        char buf[BUFFER_SIZE];
         int mem_total, mem_available = -1;
         while (fgets(buf, sizeof(buf), meminfo) != NULL)
         {
@@ -209,33 +230,29 @@ HealthReport_t HealthReporterConnection::generate_health_report()
     return report;
 }
 
-std::vector<unsigned char> HealthReporterConnection::encrypt_health_report(HealthReport_t report)
+EncryptedHealthReport *HealthReporterConnection::encrypt_health_report(HealthReport_t report)
 {
-    unsigned char *encrypted_health_report = new unsigned char[sizeof(HealthReport_t)];
-    memcpy(encrypted_health_report, &report, sizeof(HealthReport_t));
-    std::string raw_data = std::string((char*)encrypted_health_report, sizeof(HealthReport_t));
+    std::string raw_data = HealthReportSerialzer::serialize(report);
 
-    //inline std::vector<unsigned char> key_from_string(const char (*key_str)[17]) {
     char key_ptr[17];
     memcpy(key_ptr, this->enc_key.c_str(), 16);
     key_ptr[16] = '\0';
-    const char (*ptr)[17] = &key_ptr;
+    const char(*ptr)[17] = &key_ptr;
 
     const std::vector<unsigned char> key = plusaes::key_from_string(&key_ptr); // 16-char = 128-bit
-    const unsigned char iv[16] = {
-        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
-    };
 
-    // encrypt
+    // Setup encryption
     const unsigned long encrypted_size = plusaes::get_padded_encrypted_size(raw_data.size());
     std::vector<unsigned char> encrypted(encrypted_size);
 
-    plusaes::encrypt_cbc((unsigned char*)raw_data.data(), raw_data.size(), &key[0], key.size(), &iv, &encrypted[0], encrypted.size(), true);
+    plusaes::encrypt_cbc((unsigned char *)raw_data.data(), raw_data.size(), &key[0], key.size(), &this->iv, &encrypted[0], encrypted.size(), true);
 
+    // Allocate memory for encrypted health report
+    EncryptedHealthReport *encrypted_health_report = new EncryptedHealthReport;
+    encrypted_health_report->enc_size = encrypted_size;
+    encrypted_health_report->encrypted_health_report = encrypted;
 
-    // Encrypt health report
-    return encrypted;
+    return encrypted_health_report;
 }
 
 void HealthReporterConnection::handle_connected()
@@ -247,18 +264,29 @@ void HealthReporterConnection::handle_connected()
         HealthReport_t report = this->generate_health_report();
 
         // Encrypt health report
-        std::vector<unsigned char> encrypted_health_report = encrypt_health_report(report);
+        EncryptedHealthReport_t *encrypted_health_report_struct = encrypt_health_report(report);
+        std::vector<unsigned char> encrypted_health_report = encrypted_health_report_struct->encrypted_health_report;
+
+        // Create base64 encoded string of encrypted health report
+        char base64_encoded_buffer[encrypted_health_report.size() * 2];
+        memset(base64_encoded_buffer, 0, sizeof(base64_encoded_buffer));
+        int size = Base64encode(base64_encoded_buffer, (char *)encrypted_health_report.data(), encrypted_health_report.size());
 
         // Convert to string
-        std::string encrypted_health_report_str = std::string((char*)encrypted_health_report.data(), encrypted_health_report.size());
+        std::string encrypted_health_report_str = std::string(base64_encoded_buffer);
+
+        // Append newline and size of encrypted health report
+        encrypted_health_report_str += "\n";
+        encrypted_health_report_str += std::to_string(encrypted_health_report.size());
 
         // Send encrypted health report
-        if (write(this->socket, encrypted_health_report_str.c_str(), encrypted_health_report_str.size()) < 0) {
+        if (write(this->socket, encrypted_health_report_str.c_str(), encrypted_health_report_str.size()) < 0)
+        {
             cerr << "Failed to write to socket. Connection lost." << endl;
             return;
         }
 
         // Sleep for 1 second
-        sleep(1);
+        this_thread::sleep_for(chrono::seconds(1));
     }
 }

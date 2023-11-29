@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "../../global-hdrs/HealthReporterDS.hpp"
 
 class NodeConfiguration
 {
@@ -24,6 +25,7 @@ public:
     std::string enc_key;
     std::vector<NodeConfiguration> nodes;
     int health_check_interval;
+    int time_until_node_down;
 
     // Configuration reader
     static LoadBalancerConfiguration &read_config(const char *config_file);
