@@ -13,6 +13,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           style: llvm
+          extensions: .cpp,.hpp
+          # (Do not verify .c/.h files; those will likely fail due to C-styling)
           # The following value will only update a single comment
           # in a pull request's thread. Set it to false to disable the comment.
           # Set it to true to post a new comment (and delete the old comment).

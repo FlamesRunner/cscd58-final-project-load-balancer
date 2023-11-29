@@ -16,7 +16,8 @@ private:
     std::string enc_key;
 };
 
-typedef struct EncryptedHealthReport {
+typedef struct EncryptedHealthReport
+{
     unsigned long enc_size;
     std::vector<unsigned char> encrypted_health_report;
 } EncryptedHealthReport_t;

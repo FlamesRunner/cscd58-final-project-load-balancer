@@ -152,7 +152,8 @@ void LoadBalancer::start()
     scheduled_tasks_thread.detach();
 
     // Check if we need to start resource LB connections
-    if (config.balancer_algorithm == "RESOURCE") {
+    if (config.balancer_algorithm == "RESOURCE")
+    {
         this->state.start_rt_checks();
     }
 

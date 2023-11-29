@@ -237,7 +237,7 @@ EncryptedHealthReport *HealthReporterConnection::encrypt_health_report(HealthRep
     char key_ptr[17];
     memcpy(key_ptr, this->enc_key.c_str(), 16);
     key_ptr[16] = '\0';
-    const char (*ptr)[17] = &key_ptr;
+    const char(*ptr)[17] = &key_ptr;
 
     const std::vector<unsigned char> key = plusaes::key_from_string(&key_ptr); // 16-char = 128-bit
 
@@ -245,7 +245,7 @@ EncryptedHealthReport *HealthReporterConnection::encrypt_health_report(HealthRep
     const unsigned long encrypted_size = plusaes::get_padded_encrypted_size(raw_data.size());
     std::vector<unsigned char> encrypted(encrypted_size);
 
-    plusaes::encrypt_cbc((unsigned char*)raw_data.data(), raw_data.size(), &key[0], key.size(), &this->iv, &encrypted[0], encrypted.size(), true);
+    plusaes::encrypt_cbc((unsigned char *)raw_data.data(), raw_data.size(), &key[0], key.size(), &this->iv, &encrypted[0], encrypted.size(), true);
 
     // Allocate memory for encrypted health report
     EncryptedHealthReport *encrypted_health_report = new EncryptedHealthReport;
@@ -280,7 +280,8 @@ void HealthReporterConnection::handle_connected()
         encrypted_health_report_str += std::to_string(encrypted_health_report.size());
 
         // Send encrypted health report
-        if (write(this->socket, encrypted_health_report_str.c_str(), encrypted_health_report_str.size()) < 0) {
+        if (write(this->socket, encrypted_health_report_str.c_str(), encrypted_health_report_str.size()) < 0)
+        {
             cerr << "Failed to write to socket. Connection lost." << endl;
             return;
         }

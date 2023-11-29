@@ -20,27 +20,23 @@ typedef struct HealthReport
     float mem_load;
 } __attribute__((packed)) HealthReport_t;
 
-/*
-serialize:
-    unsigned char *encrypted_health_report = new unsigned char[sizeof(HealthReport_t)];
-    memcpy(encrypted_health_report, &report, sizeof(HealthReport_t));
-    std::string raw_data = std::string((char*)encrypted_health_report, sizeof(HealthReport_t));
-*/
+class HealthReportSerialzer
+{
+public:
+    static std::string serialize(HealthReport_t report)
+    {
+        unsigned char *encrypted_health_report = new unsigned char[sizeof(HealthReport_t)];
+        memcpy(encrypted_health_report, &report, sizeof(HealthReport_t));
+        std::string raw_data = std::string((char *)encrypted_health_report, sizeof(HealthReport_t));
+        return raw_data;
+    };
 
-class HealthReportSerialzer {
-    public:
-        static std::string serialize(HealthReport_t report) {
-            unsigned char *encrypted_health_report = new unsigned char[sizeof(HealthReport_t)];
-            memcpy(encrypted_health_report, &report, sizeof(HealthReport_t));
-            std::string raw_data = std::string((char*)encrypted_health_report, sizeof(HealthReport_t));
-            return raw_data;
-        };
-
-        static HealthReport_t deserialize(std::string raw_data) {
-            HealthReport_t report;
-            memcpy(&report, raw_data.c_str(), sizeof(HealthReport_t));
-            return report;
-        };
+    static HealthReport_t deserialize(std::string raw_data)
+    {
+        HealthReport_t report;
+        memcpy(&report, raw_data.c_str(), sizeof(HealthReport_t));
+        return report;
+    };
 };
 
 #define HR_DS_HDRS_DECL
