@@ -25,12 +25,13 @@ void LoadBalancer::scheduled_tasks()
 void LoadBalancer::forward_traffic(int from_socket, int to_socket)
 {
     // Read data from client
-    char buffer[1024];
+    char buffer[BUFFER_SIZE];
     while (true)
     {
-        int bytes_read = recv(from_socket, buffer, sizeof(buffer), 0);
+        int bytes_read = recv(from_socket, buffer, BUFFER_SIZE, 0);
         if (bytes_read <= 0)
             break;
+
         send(to_socket, buffer, bytes_read, 0);
     }
 }

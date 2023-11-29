@@ -9,7 +9,7 @@ clean:
 	rm -rf ./health_reporter
 production: clean prod_build
 debug: clean debug_build
-debug_build: $(working_dir)/main.cpp $(working_dir)/HealthReporter.cpp
-	g++ -DDEBUG -static $(all_flags) $(debug_cmp_flags) $(working_dir)/main.cpp $(working_dir)/HealthReporter.cpp -o $(binary_name) $(lib_flags)
-prod_build: $(working_dir)/main.cpp $(working_dir)/HealthReporter.cpp
-	g++ -DPRODUCTION -static $(all_flags) $(optimized_cmp_flags) $(working_dir)/main.cpp $(working_dir)/HealthReporter.cpp -o $(binary_name) $(lib_flags)
+debug_build: $(working_dir)/main.cpp $(working_dir)/HealthReporter.cpp $(working_dir)/../global-hdrs/base64.c
+	g++ -DDEBUG -static $(all_flags) $(debug_cmp_flags) $(working_dir)/main.cpp $(working_dir)/HealthReporter.cpp $(working_dir)/../global-hdrs/base64.c -o $(binary_name) $(lib_flags)
+prod_build: $(working_dir)/main.cpp $(working_dir)/HealthReporter.cpp $(working_dir)/../global-hdrs/base64.c
+	g++ -DPRODUCTION -static $(all_flags) $(optimized_cmp_flags) $(working_dir)/main.cpp $(working_dir)/HealthReporter.cpp $(working_dir)/../global-hdrs/base64.c -o $(binary_name) $(lib_flags)
