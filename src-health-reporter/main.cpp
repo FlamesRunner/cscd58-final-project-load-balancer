@@ -4,6 +4,13 @@
 #include "hdrs/HealthReporter.hpp"
 using namespace std;
 
+/**
+ * Prints the health reporter usage documentation.
+ * 
+ * @param fd Where to print the documentation
+ * @param prg_name The name of the executable
+ * @returns void
+*/
 void print_usage(FILE *fd, const char *prg_name)
 {
     fprintf(fd, "Usage: %s <port> <enc_key>\n", prg_name);
@@ -17,12 +24,6 @@ void print_usage(FILE *fd, const char *prg_name)
 #endif
 }
 
-void init_health_reporter(int port, const char *enc_key)
-{
-    HealthReporter hr(port, std::string(enc_key));
-    hr.start();
-}
-
 int main(int argc, char **argv)
 {
     if (argc != 3)
@@ -30,9 +31,6 @@ int main(int argc, char **argv)
         print_usage(stderr, argv[0]);
         return 1;
     }
-
-    // Initialize random seed (though we should swap this out with a better prng)
-    srand(time(NULL));
 
     int port;
     char *endptr;
@@ -52,7 +50,8 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    init_health_reporter(port, argv[2]);
+    HealthReporter hr(port, std::string(argv[2]));
+    hr.start();
 
     return 0;
 }

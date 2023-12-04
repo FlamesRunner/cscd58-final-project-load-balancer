@@ -3,7 +3,7 @@
     "balancer_algorithm": "RANDOM",
     "listener_port": 5000,
     "connection_type": "TCP",
-    "enc_key": "1234",
+    "enc_key": "1234567891234567",
     "health_check_interval": 15,
     "time_until_node_down": 5,
     "nodes": [

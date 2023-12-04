@@ -13,7 +13,7 @@ LBRoundRobin::LBRoundRobin()
  * Chooses a node based on a round robin selection
  *
  * @param state The current state of the load balancer
- * @return The node ID of the chosen node
+ * @returns The node ID of the chosen node
  */
 int LBRoundRobin::chooseNode(LoadBalancerState &state)
 {
@@ -65,7 +65,7 @@ int LBRoundRobin::chooseNode(LoadBalancerState &state)
  * Chooses a node based on a random weighted selection
  *
  * @param state The current state of the load balancer
- * @return The node ID of the chosen node
+ * @returns The node ID of the chosen node
  */
 int LBRandom::chooseNode(LoadBalancerState &state)
 {
@@ -85,7 +85,7 @@ int LBRandom::chooseNode(LoadBalancerState &state)
     }
 
     // Generate random number
-    int random = rand() % total;
+    int random = this->rng() % total; 
 
     // Find node
     int current = 0;
@@ -108,7 +108,7 @@ int LBRandom::chooseNode(LoadBalancerState &state)
  * Chooses a node based on the server's resources
  *
  * @param state The current state of the load balancer
- * @return The node ID of the chosen node
+ * @returns The node ID of the chosen node
  */
 int LBResource::chooseNode(LoadBalancerState &state)
 {

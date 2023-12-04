@@ -3,6 +3,7 @@
 #include "hdrs/LoadBalancerConfiguration.hpp"
 #include "hdrs/LoadBalancer.hpp"
 #include <thread>
+#include <random>
 
 using namespace std;
 
@@ -68,9 +69,6 @@ void init_daemon(const char *config_file)
 int main(int argc, char **argv)
 {
     char *config_file = nullptr;
-
-    // Initialize random seed (though we should swap this out with a better prng)
-    srand(time(NULL));
 
     for (;;)
     {

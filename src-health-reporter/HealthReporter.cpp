@@ -13,24 +13,46 @@
 
 using namespace std;
 
-// SIGPIPE handler to prevent program from crashing on write to closed socket
+/**
+ * SIGPIPE handler to prevent program from crashing on write to closed socket.
+ * 
+ * @param signum Signal number
+ * @returns void 
+ **/
 void sigpipe_handler(int signum)
 {
     return;
 }
 
+/**
+ * Health reporter constructor
+ * 
+ * @param port Port to listen on
+ * @param enc_key Encryption key
+*/
 HealthReporter::HealthReporter(int port, string enc_key)
 {
     this->port = port;
     this->enc_key = enc_key;
 }
 
+/**
+ * Returns the port we are listening on.
+ * 
+ * @returns Port
+*/
 int HealthReporter::get_port()
 {
     return this->port;
 }
 
-void HealthReporter::start()
+/**
+ * Listens for load balancer connections and
+ * sets up the requisite threads for it.
+ * 
+ * @returns void
+*/
+void HealthReporter::start(void)
 {
     cout << "Starting health reporter on port " << this->port << endl;
     cout << "Encryption key: " << this->enc_key << endl;
@@ -79,6 +101,12 @@ void HealthReporter::start()
     }
 }
 
+/**
+ * Health reporter constructor.
+ * 
+ * @param socket Connection
+ * @param enc_key Encryption key
+*/
 HealthReporterConnection::HealthReporterConnection(int socket, string enc_key)
 {
     this->socket = socket;
@@ -100,7 +128,12 @@ HealthReporterConnection::HealthReporterConnection(int socket, string enc_key)
     }
 }
 
-void HealthReporterConnection::start()
+/**
+ * Starts running a health reporter connection.
+ * 
+ * @returns void
+*/
+void HealthReporterConnection::start(void)
 {
     // Start handshake process
     bool handshake_status = this->handle_lb_handshake();
@@ -119,7 +152,13 @@ void HealthReporterConnection::start()
     close(this->socket);
 }
 
-bool HealthReporterConnection::handle_lb_handshake()
+/**
+ * Handles the initial handshake between the load balancer
+ * and us (health reporter).
+ * 
+ * @returns True if the connection was successful, false otherwise
+*/
+bool HealthReporterConnection::handle_lb_handshake(void)
 {
     // Check for handshake message HR_HANDSHAKE_MSG_1
     char buf[BUFFER_SIZE];
@@ -173,7 +212,14 @@ bool HealthReporterConnection::handle_lb_handshake()
     return true;
 }
 
-HealthReport_t HealthReporterConnection::generate_health_report()
+/**
+ * Generates a health report that includes the
+ * load average (analagous to CPU usage) and
+ * the memory usage.
+ * 
+ * @returns Health report
+*/
+HealthReport_t HealthReporterConnection::generate_health_report(void)
 {
     HealthReport_t report;
     // Get system load from /proc/loadavg
@@ -230,6 +276,12 @@ HealthReport_t HealthReporterConnection::generate_health_report()
     return report;
 }
 
+/**
+ * Encrypts a health report for transport.
+ * 
+ * @param report Plain-text struct of report
+ * @returns Encrypted health report
+*/
 EncryptedHealthReport *HealthReporterConnection::encrypt_health_report(HealthReport_t report)
 {
     std::string raw_data = HealthReportSerialzer::serialize(report);
@@ -255,9 +307,14 @@ EncryptedHealthReport *HealthReporterConnection::encrypt_health_report(HealthRep
     return encrypted_health_report;
 }
 
-void HealthReporterConnection::handle_connected()
+/**
+ * Loop that continuously sends health reports to
+ * the load balancers connected.
+ * 
+ * @returns void
+*/
+void HealthReporterConnection::handle_connected(void)
 {
-    // Continuously transmit health reports
     while (true)
     {
         // Generate random health report

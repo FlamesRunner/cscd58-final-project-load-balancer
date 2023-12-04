@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <random>
 #include "LoadBalancerConfiguration.hpp"
 
 enum NodeStatus
@@ -16,7 +17,14 @@ class LoadBalancerState;
 class LoadBalancerAlgorithm
 {
 public:
+    LoadBalancerAlgorithm() {
+        // Initialize RNG
+        std::random_device rd;
+        this->rng = std::mt19937(rd());
+    };
     virtual int chooseNode(LoadBalancerState &state) = 0;
+protected:
+    std::mt19937 rng;
 };
 
 class LBRoundRobin : public LoadBalancerAlgorithm
@@ -73,7 +81,6 @@ private:
     LoadBalancerConfiguration config;
     std::vector<std::shared_ptr<NodeState>> nodes;
     bool ping_health_check(NodeState &node);
-    bool tcp_health_check(NodeState &node);
     unsigned char iv[16];
 };
 

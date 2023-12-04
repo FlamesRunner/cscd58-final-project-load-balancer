@@ -9,6 +9,11 @@
 #include <memory>
 using namespace std;
 
+/**
+ * Constructor for the load balancer state.
+ *
+ * @param config Configuration object
+ */
 LoadBalancerState::LoadBalancerState(LoadBalancerConfiguration config)
 {
     this->config = config;
@@ -42,6 +47,13 @@ LoadBalancerState::LoadBalancerState(LoadBalancerConfiguration config)
     }
 }
 
+/**
+ * Handles communications between the load balancer and the
+ * node.
+ *
+ * @param node_ptr (Shared) pointer to the node state
+ * @returns void
+ */
 void LoadBalancerState::lb_rt_thread(shared_ptr<NodeState> node_ptr)
 {
     NodeState &node = *node_ptr;
@@ -131,13 +143,13 @@ void LoadBalancerState::lb_rt_thread(shared_ptr<NodeState> node_ptr)
             iv[i] = iv_str[i];
         }
 
-        #ifdef DEBUG
+#ifdef DEBUG
         cout << "Connection established with node " << node.node_config.name << " with IV " << iv_str << endl;
-        #endif
+#endif
 
-        #ifdef PROD
+#ifdef PROD
         cout << "Connection established with node " << node.node_config.name << endl;
-        #endif
+#endif
 
         while (true)
         {
@@ -188,9 +200,9 @@ void LoadBalancerState::lb_rt_thread(shared_ptr<NodeState> node_ptr)
             node.mem_usage = hr.mem_load;
             node.set_last_checked(time(NULL));
 
-            #ifdef DEBUG
+#ifdef DEBUG
             cout << "Received health report from node " << node.node_config.name << ": " << node.cpu_usage << ", " << node.mem_usage << endl;
-            #endif
+#endif
 
             // Set node as up
             node.set_status(NODE_STATUS_UP);
@@ -201,6 +213,16 @@ void LoadBalancerState::lb_rt_thread(shared_ptr<NodeState> node_ptr)
     }
 }
 
+/**
+ * Handles node status conversions: if a node's health reporter
+ * does not contact us within the required time (specified in
+ * the configuration), this thread function stops new incoming
+ * connections from ending up on the node. Does this for all
+ * of the nodes configured.
+ *
+ * @param nodes All node states
+ * @returns void
+ */
 void LoadBalancerState::invalidator_thread(vector<shared_ptr<NodeState>> nodes)
 {
     while (true)
@@ -223,6 +245,13 @@ void LoadBalancerState::invalidator_thread(vector<shared_ptr<NodeState>> nodes)
     }
 }
 
+/**
+ * Handles the creation of the real-time health checking threads;
+ * in particular, the real-time health reporter connections and
+ * the invalidator thread (used to mark nodes as unavailable).
+ *
+ * @returns void
+ */
 void LoadBalancerState::start_rt_checks(void)
 {
     // For each node, read the LB connector port
@@ -239,26 +268,54 @@ void LoadBalancerState::start_rt_checks(void)
     invalidator_thread.detach();
 }
 
+/**
+ * Returns the configuration we are runnign on.
+ *
+ * @returns Load balancer configuration
+ */
 LoadBalancerConfiguration LoadBalancerState::get_config(void)
 {
     return this->config;
 }
 
+/**
+ * Returns the status of this node.
+ *
+ * @returns Node status
+ */
 NodeStatus NodeState::get_status(void)
 {
     return this->status;
 }
 
+/**
+ * Returns the last time a health check report
+ * was returned for this node in a UNIX timestamp
+ * in seconds.
+ *
+ * @returns Seconds-formatted UNIX timestamp of last health check receipt time
+ */
 int NodeState::get_last_checked(void)
 {
     return this->last_checked;
 }
 
+/**
+ * Sets the node status.
+ * 
+ * @param status New node status
+*/
 void NodeState::set_status(NodeStatus status)
 {
     this->status = status;
 }
 
+/**
+ * Performs an ICMP-based health check (makes a single ICMP request).
+ * 
+ * @param node Reference to the node state
+ * @returns Whether the node is up (true) or down (false).
+*/
 bool LoadBalancerState::ping_health_check(NodeState &node)
 {
     // Ping the node (need to fix so it isn't platform dependent).
@@ -288,12 +345,13 @@ bool LoadBalancerState::ping_health_check(NodeState &node)
     }
 }
 
-bool LoadBalancerState::tcp_health_check(NodeState &node)
-{
-    // Stub: need to implement
-    return true;
-}
-
+/**
+ * Used for ICMP health checks, and is executed once every
+ * fixed time interval as given in the configuration. It
+ * pings every node to determine its status.
+ * 
+ * @returns void
+*/
 void LoadBalancerState::run_health_checks(void)
 {
     // Run timed health checks. This is only used
@@ -312,6 +370,11 @@ void LoadBalancerState::run_health_checks(void)
     }
 }
 
+/**
+ * Node state constructor.
+ * 
+ * @param node_config Node configuration
+*/
 NodeState::NodeState(NodeConfiguration &node_config)
 {
     this->node_config = node_config;
@@ -320,12 +383,24 @@ NodeState::NodeState(NodeConfiguration &node_config)
     this->status = NODE_STATUS_DOWN;
 }
 
+/**
+ * Sets the time since we last received a health report
+ * for a node.
+ * 
+ * @param last_checked Integer second value
+ * @returns void
+*/
 void NodeState::set_last_checked(int last_checked)
 {
     this->last_checked = last_checked;
 }
 
-std::vector<std::shared_ptr<NodeState>> LoadBalancerState::getNodes()
+/**
+ * Returns the node states of the load balancer.
+ * 
+ * @returns Node states
+*/
+std::vector<std::shared_ptr<NodeState>> LoadBalancerState::getNodes(void)
 {
     return this->nodes;
 }

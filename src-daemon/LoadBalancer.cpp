@@ -10,6 +10,11 @@
 
 using namespace std;
 
+/**
+ * Wrapper to start health checks for the load balancer.
+ * 
+ * @returns void
+*/
 void LoadBalancer::scheduled_tasks()
 {
     while (true)
@@ -22,6 +27,13 @@ void LoadBalancer::scheduled_tasks()
     }
 }
 
+/**
+ * Handles the forwarding of traffic, for both node->client and client->node.
+ * 
+ * @param from_socket Socket to listen on
+ * @param to_socket Socket to forward data to
+ * @returns void
+*/
 void LoadBalancer::forward_traffic(int from_socket, int to_socket)
 {
     // Read data from client
@@ -36,7 +48,14 @@ void LoadBalancer::forward_traffic(int from_socket, int to_socket)
     }
 }
 
-void LoadBalancer::listener()
+/**
+ * Load balancer listener. Handles accepting connections from
+ * incoming requests, decides a suitable node to forward to
+ * and sets up the forwarder threads.
+ * 
+ * @returns void
+*/
+void LoadBalancer::listener(void)
 {
     // Set up listener
     errno = 0;
@@ -142,7 +161,13 @@ void LoadBalancer::listener()
     }
 }
 
-void LoadBalancer::start()
+/**
+ * Load balancer initializer, called by main after configuration
+ * is parsed.
+ * 
+ * @returns void
+*/
+void LoadBalancer::start(void)
 {
     // Initialize state
     this->state = LoadBalancerState(config);
@@ -161,11 +186,21 @@ void LoadBalancer::start()
     this->listener();
 }
 
+/**
+ * Returns the load balancer configuration.
+ * 
+ * @returns Load balancer configuration
+*/
 LoadBalancerConfiguration &LoadBalancer::get_config(void)
 {
     return this->config;
 }
 
+/**
+ * Returns the load balancer state.
+ * 
+ * @returns Load balancer state
+*/
 LoadBalancerState LoadBalancer::get_state(void)
 {
     return this->state;

@@ -34,6 +34,7 @@ LoadBalancerConfiguration &LoadBalancerConfiguration::read_config(const char *co
     // Parse nodes
     json nodes_json = config_json["nodes"];
 
+    // Read node values
     for (json::iterator it = nodes_json.begin(); it != nodes_json.end(); ++it)
     {
         NodeConfiguration node;
